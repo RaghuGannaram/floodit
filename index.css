@@ -1,0 +1,77 @@
+body {
+    text-align: center;
+    font-family: monospace
+}
+
+.heading,
+.sub-heading {
+    margin: 0px;
+    display: inline-block;
+}
+
+.container {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 50px 50px 0px 50px;
+}
+
+.table {
+    border-collapse: collapse;
+    border: 1px solid black;
+}
+
+.table td {
+    border: 1px solid black;
+    width: 12px;
+    height: 12px;
+}
+
+.game-controls {
+    height: 70vh;
+    width: 20%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+}
+
+.score-board {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    grid-gap: 10px;
+}
+
+.score-board .score-heading {
+    text-align: left;
+}
+
+.score-board .score-value {
+    text-align: right;
+}
+
+.input-section {
+    height: 25vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+}
+
+.input-section .algorithm {
+    margin-bottom: 20px;
+    width: 100%;
+}
+
+.input-section .user-input {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    grid-gap: 10px;
+}
+
+.input-section .user-input label {
+    text-align: left;
+}
+
+.input-section .start-btn {
+    margin-top: 20px;
+    width: 100%;
+}
