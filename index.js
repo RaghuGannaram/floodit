@@ -29,6 +29,15 @@ function renderTable() {
 			td.setAttribute("id", `${i}-${j}`);
 			td.setAttribute("title", `${i + 1}/${j + 1}`);
 			td.style.backgroundColor = gameProperties.initialCellColor;
+			td.onclick = (event) => {
+				if (td.style.backgroundColor !== gameProperties.obstacleCellColor) {
+					let [row, col] = event.target.getAttribute("title").split("/");
+					document.getElementById("x").value = parseInt(row);
+					document.getElementById("y").value = parseInt(col);
+					currentGameState.originX = parseInt(row)-1;
+					currentGameState.originY = parseInt(col)-1;
+				}
+			};
 			tr.appendChild(td);
 		}
 		table.appendChild(tr);

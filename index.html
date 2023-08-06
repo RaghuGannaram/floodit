@@ -4,20 +4,23 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="./assets/icon.png" type="image/png">
   <link rel="stylesheet" href="./index.css">
   <title>Stategic Position</title>
 </head>
 
 <body>
-  
+
   <div>
     <h2 class="heading">STRATEGIC POSITION</h2>
     | <span class="sub-heading">A demonstration of flood fill algorithm</span>
   </div>
 
   <div class="container">
-    <table id="table" class="table">
-    </table>
+    <div class="game-area">
+      <table id="table" class="table">
+      </table>
+    </div>
     <div class="game-controls">
       <div class="score-board">
         <span class="score-heading">Highest Score :</span>
@@ -36,9 +39,9 @@
           <label for="y">Column : </label>
           <input type="number" name="y" id="y" min="1" placeholder="Enter column number">
         </div>
-        <button class="start-btn" id = "startBtn">start</button>
-        <button class="reset-btn" id = "resetBtn">reset</button>
-        <button class="shuffle-btn" id = "shuffleBtn">shuffle</button>
+        <button class="start-btn" id="startBtn">start</button>
+        <button class="reset-btn" id="resetBtn">reset</button>
+        <button class="shuffle-btn" id="shuffleBtn">shuffle</button>
       </div>
     </div>
     <script src="./index.js"></script>
