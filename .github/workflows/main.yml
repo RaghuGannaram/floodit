@@ -1,4 +1,4 @@
-name: Startegic Position Workflow
+name: FloodIt Workflow
 
 on:
     push:
