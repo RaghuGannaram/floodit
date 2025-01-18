@@ -29,6 +29,7 @@ function renderTable() {
             td.setAttribute("id", `${i}-${j}`);
             td.setAttribute("class", `cell`);
             td.setAttribute("title", `${i + 1}/${j + 1}`);
+            td.setAttribute("data-state", "empty");
             td.style.backgroundColor = gameProperties.initialCellColor;
             td.onclick = (event) => {
                 if (td.style.backgroundColor !== gameProperties.obstacleCellColor) {
@@ -47,6 +48,7 @@ function renderTable() {
     for (let i = 0; i < gameProperties.obstacleCount; i++) {
         let row = Math.floor(Math.random() * gameProperties.rowCount);
         let col = Math.floor(Math.random() * gameProperties.columnCount);
+        document.getElementById(`${row}-${col}`).setAttribute("data-state", "obstacle");
         document.getElementById(`${row}-${col}`).style.backgroundColor = gameProperties.obstacleCellColor;
     }
 }
@@ -91,7 +93,10 @@ async function fillCellWithDelay(row, col, color) {
         requestAnimationFrame(() => {
             const cell = document.getElementById(`${row}-${col}`);
             cell.classList.add("flooded");
+            cell.setAttribute("data-state", "flooded");
             cell.style.backgroundColor = color;
+            cell.style.transition = "background-color 0.2s ease-out";
+            cell.style.border = "none";
             currentGameState.currentScore++;
             resolve();
         });
@@ -110,7 +115,7 @@ async function floodFillBFS(startRow, startCol) {
         const [currentRow, currentCol] = queue.shift();
         const currentCell = document.getElementById(`${currentRow}-${currentCol}`);
 
-        if (currentCell.style.backgroundColor === initialCellColor) {
+        if (currentCell.getAttribute("data-state") === "empty") {
             await fillCellWithDelay(currentRow, currentCol, exploredCellColor);
 
             if (currentRow - 1 >= 0) {
@@ -142,7 +147,7 @@ async function floodFillDFS(startRow, startCol) {
         const [currentRow, currentCol] = stack.pop();
         const currentCell = document.getElementById(`${currentRow}-${currentCol}`);
 
-        if (currentCell.style.backgroundColor === initialCellColor) {
+        if (currentCell.getAttribute("data-state") === "empty") {
             await fillCellWithDelay(currentRow, currentCol, exploredCellColor);
 
             if (currentRow - 1 >= 0) {
@@ -165,8 +170,11 @@ async function floodFillDFS(startRow, startCol) {
 function clearTable() {
     for (let i = 0; i < gameProperties.rowCount; i++) {
         for (let j = 0; j < gameProperties.columnCount; j++) {
-            if (document.getElementById(`${i}-${j}`).style.backgroundColor === gameProperties.exploredCellColor) {
+            if (document.getElementById(`${i}-${j}`).getAttribute("data-state") === "flooded") {
+                document.getElementById(`${i}-${j}`).setAttribute("data-state", "empty");
                 document.getElementById(`${i}-${j}`).style.backgroundColor = gameProperties.initialCellColor;
+                document.getElementById(`${i}-${j}`).style.border = "1px solid black";
+                document.getElementById(`${i}-${j}`).style.transition = "none";
             }
         }
     }
