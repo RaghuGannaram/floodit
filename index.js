@@ -185,7 +185,7 @@ async function floodFillDFS(startRow, startCol) {
         const [currentRow, currentCol] = stack.pop();
         const currentCell = document.getElementById(`${currentRow}-${currentCol}`);
 
-        if (currentCell.getAttribute("data-state") === "empty") {
+        if (currentCell.getAttribute("data-state") === "empty" || currentCell.getAttribute("data-state") === "source") {
             await fillCellWithDelay(currentRow, currentCol, exploredCellColor);
 
             if (currentRow - 1 > 0) {
