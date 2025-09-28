@@ -1,18 +1,27 @@
-const initialGameState = {
-    originX: 0,
-    originY: 0,
-    algorithm: "bfs",
-    currentScore: 0,
-};
-
 const gameProperties = {
     rowCount: 50,
     columnCount: 50,
-    obstacleCount: 1200,
-    initialCellColor: "white",
-    exploredCellColor: "#5F9EA0",
-    obstacleCellColor: "grey",
-    heightestScore: 0,
+    obstacleCount: 1800,
+    initialCellColor: "#ffffff",
+    sourceCellColor: "#287679",
+    exploredCellColor: "#5f9ea0",
+    obstacleCellColor: "#808080",
+};
+
+const initialGameInputs = {
+    rowPosition: 1,
+    columnPosition: 1,
+    algorithm: "bfs",
+    selectedCell: `1-1`,
+};
+
+const initialGameState = {
+    currentScore: 0,
+    highestScore: 0,
+};
+
+let currentGameInputs = {
+    ...initialGameInputs,
 };
 
 let currentGameState = {
@@ -22,22 +31,26 @@ let currentGameState = {
 function renderTable() {
     let table = document.getElementById("table");
 
-    for (let i = 0; i < gameProperties.rowCount; i++) {
+    for (let i = 1; i <= gameProperties.rowCount; i++) {
         let tr = document.createElement("tr");
-        for (let j = 0; j < gameProperties.columnCount; j++) {
+        for (let j = 1; j <= gameProperties.columnCount; j++) {
             let td = document.createElement("td");
             td.setAttribute("id", `${i}-${j}`);
+            td.setAttribute("title", `${i}/${j}`);
             td.setAttribute("class", `cell`);
-            td.setAttribute("title", `${i + 1}/${j + 1}`);
             td.setAttribute("data-state", "empty");
             td.style.backgroundColor = gameProperties.initialCellColor;
+
             td.onclick = (event) => {
                 if (td.style.backgroundColor !== gameProperties.obstacleCellColor) {
                     let [row, col] = event.target.getAttribute("title").split("/");
-                    document.getElementById("x").value = parseInt(row);
-                    document.getElementById("y").value = parseInt(col);
-                    currentGameState.originX = parseInt(row) - 1;
-                    currentGameState.originY = parseInt(col) - 1;
+                    currentGameInputs.rowPosition = parseInt(row);
+                    currentGameInputs.columnPosition = parseInt(col);
+                    renderSelectedCell();
+                    document.getElementById("r").value = parseInt(row);
+                    document.getElementById("c").value = parseInt(col);
+                } else {
+                    alert("Invalid cell! Please select a valid cell.");
                 }
             };
             tr.appendChild(td);
@@ -46,41 +59,61 @@ function renderTable() {
     }
 
     for (let i = 0; i < gameProperties.obstacleCount; i++) {
-        let row = Math.floor(Math.random() * gameProperties.rowCount);
-        let col = Math.floor(Math.random() * gameProperties.columnCount);
+        let row = Math.max(1, Math.floor(Math.random() * (gameProperties.rowCount + 1)));
+        let col = Math.max(1, Math.floor(Math.random() * (gameProperties.columnCount + 1)));
         document.getElementById(`${row}-${col}`).setAttribute("data-state", "obstacle");
         document.getElementById(`${row}-${col}`).style.backgroundColor = gameProperties.obstacleCellColor;
     }
 }
 
-function setInitialValues() {
-    document.getElementById("x").setAttribute("max", gameProperties.rowCount);
-    document.getElementById("y").setAttribute("max", gameProperties.columnCount);
-    document.getElementById("highestScore").innerHTML = gameProperties.heightestScore;
-    document.getElementById("currentScore").innerHTML = currentGameState.currentScore;
+function renderSelectedCell() {
+    let previousSelectedCell = document.getElementById(`${currentGameInputs.selectedCell}`);
+
+    if (previousSelectedCell.getAttribute("data-state") === "source") {
+        previousSelectedCell.setAttribute("data-state", "empty");
+        previousSelectedCell.style.backgroundColor = gameProperties.initialCellColor;
+    }
+
+    currentGameInputs.selectedCell = `${currentGameInputs.rowPosition}-${currentGameInputs.columnPosition}`;
+
+    let currentSelectedCell = document.getElementById(`${currentGameInputs.selectedCell}`);
+    currentSelectedCell.setAttribute("data-state", "source");
+    currentSelectedCell.style.backgroundColor = gameProperties.sourceCellColor;
 }
 
-function normalizeGameState() {
-    const { originX, originY, algorithm, currentScore } = currentGameState;
-    document.getElementById("x").value = originX;
-    document.getElementById("y").value = originY;
-    document.getElementById("algorithm").value = algorithm;
-    document.getElementById("currentScore").innerHTML = currentScore;
+function initializeGameInputs() {
+    document.getElementById("r").setAttribute("max", gameProperties.rowCount);
+    document.getElementById("c").setAttribute("max", gameProperties.columnCount);
+    document.getElementById("r").value = currentGameInputs.rowPosition;
+    document.getElementById("c").value = currentGameInputs.columnPosition;
+    document.getElementById("algorithm").value = currentGameInputs.algorithm;
+}
+
+function initializeGameState() {
+    document.getElementById("currentScore").innerHTML = currentGameState.currentScore;
+    document.getElementById("highestScore").innerHTML = currentGameState.highestScore;
+}
+
+function setInitialValues() {
+    initializeGameInputs();
+    initializeGameState();
 }
 
 function createEventListeners() {
     document.getElementById("algorithm").addEventListener("change", (event) => {
-        currentGameState.algorithm = event.target.value;
+        currentGameInputs.algorithm = event.target.value;
     });
-    document.getElementById("x").addEventListener("change", (event) => {
-        event.target.value = Math.max(event.target.value, 1);
+    document.getElementById("r").addEventListener("change", (event) => {
+        event.target.value = Math.max(1, event.target.value);
         event.target.value = Math.min(event.target.value, gameProperties.rowCount);
-        currentGameState.originX = event.target.value - 1;
+        currentGameInputs.rowPosition = event.target.value;
+        renderSelectedCell();
     });
-    document.getElementById("y").addEventListener("change", (event) => {
-        event.target.value = Math.max(event.target.value, 0);
-        event.target.value = Math.min(event.target.value, gameProperties.rowCount);
-        currentGameState.originY = event.target.value - 1;
+    document.getElementById("c").addEventListener("change", (event) => {
+        event.target.value = Math.max(1, event.target.value);
+        event.target.value = Math.min(event.target.value, gameProperties.columnCount);
+        currentGameInputs.columnPosition = event.target.value;
+        renderSelectedCell();
     });
 
     document.getElementById("startBtn").addEventListener("click", play);
@@ -93,8 +126,13 @@ async function fillCellWithDelay(row, col, color) {
         requestAnimationFrame(() => {
             const cell = document.getElementById(`${row}-${col}`);
             cell.classList.add("flooded");
-            cell.setAttribute("data-state", "flooded");
-            cell.style.backgroundColor = color;
+            if (!["source", "source-flooded"].includes(cell.getAttribute("data-state"))) {
+                cell.setAttribute("data-state", "flooded");
+                cell.style.backgroundColor = color;
+            } else {
+                cell.setAttribute("data-state", "source-flooded");
+                cell.style.backgroundColor = gameProperties.sourceCellColor;
+            }
             cell.style.transition = "background-color 0.2s ease-out";
             cell.style.border = "none";
             currentGameState.currentScore++;
@@ -115,19 +153,19 @@ async function floodFillBFS(startRow, startCol) {
         const [currentRow, currentCol] = queue.shift();
         const currentCell = document.getElementById(`${currentRow}-${currentCol}`);
 
-        if (currentCell.getAttribute("data-state") === "empty") {
+        if (currentCell.getAttribute("data-state") === "empty" || currentCell.getAttribute("data-state") === "source") {
             await fillCellWithDelay(currentRow, currentCol, exploredCellColor);
 
-            if (currentRow - 1 >= 0) {
+            if (currentRow - 1 > 0) {
                 queue.push([currentRow - 1, currentCol]);
             }
-            if (currentRow + 1 < rowCount) {
+            if (currentRow + 1 <= rowCount) {
                 queue.push([currentRow + 1, currentCol]);
             }
-            if (currentCol - 1 >= 0) {
+            if (currentCol - 1 > 0) {
                 queue.push([currentRow, currentCol - 1]);
             }
-            if (currentCol + 1 < columnCount) {
+            if (currentCol + 1 <= columnCount) {
                 queue.push([currentRow, currentCol + 1]);
             }
         }
@@ -150,16 +188,16 @@ async function floodFillDFS(startRow, startCol) {
         if (currentCell.getAttribute("data-state") === "empty") {
             await fillCellWithDelay(currentRow, currentCol, exploredCellColor);
 
-            if (currentRow - 1 >= 0) {
+            if (currentRow - 1 > 0) {
                 stack.push([currentRow - 1, currentCol]);
             }
-            if (currentRow + 1 < rowCount) {
+            if (currentRow + 1 <= rowCount) {
                 stack.push([currentRow + 1, currentCol]);
             }
-            if (currentCol - 1 >= 0) {
+            if (currentCol - 1 > 0) {
                 stack.push([currentRow, currentCol - 1]);
             }
-            if (currentCol + 1 < columnCount) {
+            if (currentCol + 1 <= columnCount) {
                 stack.push([currentRow, currentCol + 1]);
             }
         }
@@ -168,9 +206,9 @@ async function floodFillDFS(startRow, startCol) {
 }
 
 function clearTable() {
-    for (let i = 0; i < gameProperties.rowCount; i++) {
-        for (let j = 0; j < gameProperties.columnCount; j++) {
-            if (document.getElementById(`${i}-${j}`).getAttribute("data-state") === "flooded") {
+    for (let i = 1; i <= gameProperties.rowCount; i++) {
+        for (let j = 1; j <= gameProperties.columnCount; j++) {
+            if (document.getElementById(`${i}-${j}`).getAttribute("data-state") === "flooded" || document.getElementById(`${i}-${j}`).getAttribute("data-state") === "source-flooded") {
                 document.getElementById(`${i}-${j}`).setAttribute("data-state", "empty");
                 document.getElementById(`${i}-${j}`).style.backgroundColor = gameProperties.initialCellColor;
                 document.getElementById(`${i}-${j}`).style.border = "1px solid black";
@@ -182,41 +220,64 @@ function clearTable() {
 
 async function play() {
     clearTable();
-    const { originX, originY, algorithm } = currentGameState;
-    currentGameState = {
-        ...initialGameState,
-    };
-    normalizeGameState();
-    if (algorithm === "bfs") {
-        await floodFillBFS(originX, originY);
-    } else {
-        await floodFillDFS(originX, originY);
+    const { rowPosition, columnPosition, algorithm } = currentGameInputs;
+
+    let selectedCell = document.getElementById(`${rowPosition}-${columnPosition}`);
+    if (selectedCell.getAttribute("data-state") === "obstacle") {
+        alert("Invalid cell! Please select a valid cell.");
+        return;
     }
+
+    currentGameState.currentScore = 0;
     document.getElementById("currentScore").innerHTML = currentGameState.currentScore;
-    if (currentGameState.currentScore > gameProperties.heightestScore) {
-        gameProperties.heightestScore = currentGameState.currentScore;
-        document.getElementById("highestScore").innerHTML = currentGameState.currentScore;
+
+    if (algorithm === "bfs") {
+        await floodFillBFS(rowPosition, columnPosition);
+    } else {
+        await floodFillDFS(rowPosition, columnPosition);
+    }
+
+    document.getElementById("currentScore").innerHTML = currentGameState.currentScore;
+
+    if (currentGameState.currentScore > currentGameState.highestScore) {
+        currentGameState.highestScore = currentGameState.currentScore;
+        document.getElementById("highestScore").innerHTML = currentGameState.highestScore;
     }
 }
 
 function reset() {
     clearTable();
+    currentGameInputs = {
+        ...initialGameInputs,
+    };
     currentGameState = {
         ...initialGameState,
     };
-    normalizeGameState();
+    setInitialValues();
 }
 
 function shuffle() {
     clearTable();
-    for (let i = 0; i < gameProperties.rowCount; i++) {
-        for (let j = 0; j < gameProperties.columnCount; j++) {
-            document.getElementById(`${i}-${j}`).style.backgroundColor = gameProperties.initialCellColor;
+    currentGameInputs = {
+        ...initialGameInputs,
+    };
+    currentGameState = {
+        ...initialGameState,
+    };
+    setInitialValues();
+
+    for (let i = 1; i <= gameProperties.rowCount; i++) {
+        for (let j = 1; j <= gameProperties.columnCount; j++) {
+            let cell = document.getElementById(`${i}-${j}`);
+            cell.setAttribute("data-state", "empty");
+            cell.style.backgroundColor = gameProperties.initialCellColor;
         }
     }
+
     for (let i = 0; i < gameProperties.obstacleCount; i++) {
-        let row = Math.floor(Math.random() * gameProperties.rowCount);
-        let col = Math.floor(Math.random() * gameProperties.columnCount);
+        let row = Math.max(1, Math.floor(Math.random() * (gameProperties.rowCount + 1)));
+        let col = Math.max(1, Math.floor(Math.random() * (gameProperties.columnCount + 1)));
+        document.getElementById(`${row}-${col}`).setAttribute("data-state", "obstacle");
         document.getElementById(`${row}-${col}`).style.backgroundColor = gameProperties.obstacleCellColor;
     }
 }
