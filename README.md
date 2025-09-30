@@ -36,6 +36,19 @@ A fun and strategic game to test your flood-fill algorithm skills!
 -   **CSS** 🎨: Styling and colors for a pleasing experience.
 -   **JavaScript** ⚙️: Logic for flood-fill, score tracking, and interactivity.
 
+## 🏗️ System Architecture
+
+The system uses a cloud-based deployment pipeline to deliver the game efficiently and reliably.
+
+![System Architecture](./assets/architecture.png)
+
+**Flow Overview**:
+
+-   **Azure DNS** resolves the game’s domain name.
+-   **Amazon CloudFront** provides global CDN distribution for faster access.
+-   **Amazon S3** hosts the static game files.
+-   **GitHub Actions** automates deployment, pushing the latest build into S3.
+
 ## 📜 Roadmap
 
 -   [x] Flood-fill logic implementation.

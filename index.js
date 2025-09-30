@@ -1,7 +1,7 @@
 const gameProperties = {
     rowCount: 50,
     columnCount: 50,
-    obstacleCount: 1800,
+    obstacleCount: 1500,
     initialCellColor: "#ffffff",
     sourceCellColor: "#287679",
     exploredCellColor: "#5f9ea0",
