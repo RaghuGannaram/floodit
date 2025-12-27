@@ -5,7 +5,7 @@ async function loadVersion() {
 		const response = await fetch("./metadata.json?t=" + Date.now());
 		const meta = await response.json();
 
-		versionEl.innerHTML = `<span>${meta.version}</span>`;
+		versionEl.innerHTML = `<span>v${meta.version}</span>`;
 
 		versionEl.setAttribute("data-date", meta.date);
 		versionEl.setAttribute("data-hash", meta.hash);
