@@ -19,5 +19,26 @@ jobs:
                   aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
                   aws-region: ${{ vars.AWS_S3_REGION }}
 
+            - name: Update metadata.json
+              run: |
+                  echo "$(jq --arg date "$(date +'%Y-%m-%d %H:%M:%S')" --arg hash "${{ github.sha }}" '.buildDate=$date | .commitHash=$hash' metadata.json)" > metadata.json
+
+            - name: Generate Version and Update Metadata
+                    id: versioning
+                    run: |
+                      MAJOR_MINOR="1.0"
+                      
+                      FULL_VERSION="${MAJOR_MINOR}.${{ github.run_number }}"
+
+                      echo "Generated Version: $FULL_VERSION"
+                      
+                      jq --arg ver "$FULL_VERSION" \
+                         --arg date "$(date +'%Y-%m-%d %H:%M:%S')" \
+                         --arg hash "${{ github.sha }}" \
+                         '.version=$ver | .date=$date | .hash=$hash' \
+                         metadata.json > tmp.json && mv tmp.json metadata.json
+                        
+                      cat metadata.json
+                      
             - name: Deploy static site to S3 bucket
               run: aws s3 sync ./ s3://${{ vars.AWS_S3_BUCKET }} --delete
